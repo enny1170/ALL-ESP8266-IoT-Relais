@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>ESP-Relais</title>
+        <title>ESP-Relais MQTT</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
         <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
         <script src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -45,23 +45,16 @@
         <section class="section">
             <div class="container">
                <div class="content">
-                  <form>
-                     <div class="field">
-                        <div class="label">Device Id:</div>
-                        <div class="control">%TemplateDeviceId%</div>
-                     </div>
-                     <div class="field">
-                        <div class="label">Mac Address:</div>
-                        <div class="control">%TemplateMacAddress%</div>
-                     </div>
-                     <div class="field">
-                        <div class="label">Ip Address:</div>
-                        <div class="control">%TemplateIpAddress%</div>
-                     </div>
-                     <div class="field">
-                        <div class="label">State:</div>
-                        <div class="control">%TemplateCoilState%</div>
-                     </div>
+                  <form method="POST">
+                    <div class="content is-danger">
+                        This will set the device to factory defaults. By removing any configuration and reboot. You are sure ?
+                    </div>
+                    <div class="field">
+                        <div class="buttons">
+                            <button class="button is-danger">Reset</button>
+                            <button class="button">Reboot</button>
+                        </div>
+                    </div>
                   </form>
                </div>
              </div>

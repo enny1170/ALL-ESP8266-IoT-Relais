@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>ESP-Relais</title>
+        <title>ESP-Relais MQTT</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
         <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
         <script src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -45,23 +45,31 @@
         <section class="section">
             <div class="container">
                <div class="content">
-                  <form>
-                     <div class="field">
-                        <div class="label">Device Id:</div>
-                        <div class="control">%TemplateDeviceId%</div>
+                  <form method="POST">
+                    <div class="field">
+                        <div class="control">
+                            <label class="checkbox">MQTT enabled:</Label>
+                            <input type="checkbox" value="enabled" name="enabled" checked="%TemplateMQTTEnabled%">
+                        </div>
                      </div>
                      <div class="field">
-                        <div class="label">Mac Address:</div>
-                        <div class="control">%TemplateMacAddress%</div>
+                        <div class="control">
+                            <label class="label">MQTT-Server:</label>
+                            <input class="input" type="text" value="%TemplateMQTTServer%" name="server">
+                        </div>
                      </div>
                      <div class="field">
-                        <div class="label">Ip Address:</div>
-                        <div class="control">%TemplateIpAddress%</div>
+                        <div class="control">
+                            <label class="label">Port:</label>
+                            <input class="input" type="text" value="%TemplateMQTTPort%" name="port">
+                        </div>
                      </div>
                      <div class="field">
-                        <div class="label">State:</div>
-                        <div class="control">%TemplateCoilState%</div>
-                     </div>
+                        <div class="buttons">
+                            <button class="button">Save</button>
+                            <button class="button">Cancel</button>
+                        </div>
+                    </div>
                   </form>
                </div>
              </div>

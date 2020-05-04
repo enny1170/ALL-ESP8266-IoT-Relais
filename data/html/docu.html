@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>ESP-Relais</title>
+        <title>ESP-Relais Readme</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
         <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
         <script src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -44,28 +44,23 @@
       </nav>
         <section class="section">
             <div class="container">
-               <div class="content">
-                  <form>
-                     <div class="field">
-                        <div class="label">Device Id:</div>
-                        <div class="control">%TemplateDeviceId%</div>
-                     </div>
-                     <div class="field">
-                        <div class="label">Mac Address:</div>
-                        <div class="control">%TemplateMacAddress%</div>
-                     </div>
-                     <div class="field">
-                        <div class="label">Ip Address:</div>
-                        <div class="control">%TemplateIpAddress%</div>
-                     </div>
-                     <div class="field">
-                        <div class="label">State:</div>
-                        <div class="control">%TemplateCoilState%</div>
-                     </div>
-                  </form>
-               </div>
+                <div class="content">
+                <p>This is a alternative Firmware for the 4duino IoT WLAN Relais ESP8266-UPRelais provided by ALLNET.</p>
+                <p>Support fallowing mechanism for switching the onboard Realais</p>
+                    <dl class="content is-small">
+                        <li>
+                            switching by URL http://[IP-Address]/html/switch?cmd=1 for ON or  </br> http://[IP-Address]/html/switch?cmd=0 for OFF
+                        </li>
+                        <li>
+                            using Web-Sockets on http://[IP-Address]/ws possible Values 1/0 for ON/OFF
+                        </li>
+                        <li>
+                            connect to a MQTT-Server, Status will be published to Topic [DeviceId]/state </br> Commands will subscribed at [DeviceId]/cmd, possible Values 1/0 for ON/OFF
+                        </li>
+                    </dl>
+                
+                </div>
              </div>
         </section>
     </body>
 </html>
-
