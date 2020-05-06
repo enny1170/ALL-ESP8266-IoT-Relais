@@ -17,6 +17,7 @@ class wificonfig
     String Passwd;
     String Name=String("ESP-");
     bool ApMode=false;
+    String ChipId;
     void begin();
     void reset();
     void load();
@@ -24,7 +25,6 @@ class wificonfig
     wificonfig();
     private:
     char * buff;
-    String chipId;
 };
 
 #endif

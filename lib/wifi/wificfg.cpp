@@ -6,8 +6,8 @@ const size_t capacity = JSON_OBJECT_SIZE(2) + 70;
 
 wificonfig::wificonfig()
 {
-    chipId=String(ESP.getChipId());
-    chipId=String("ESP_")+chipId;
+    ChipId=String(ESP.getChipId());
+    ChipId=String("ESP_")+ChipId;
 }
 
 void wificonfig::begin()
@@ -15,7 +15,7 @@ void wificonfig::begin()
     load();
     if(SSID=="")
     {
-        WiFi.softAP(chipId.c_str());
+        WiFi.softAP(ChipId.c_str());
         ApMode=true;
     }
     else
@@ -37,7 +37,7 @@ void wificonfig::begin()
         if(WiFi.status() != WL_CONNECTED)
         {
             Serial.printf("Failed to connect %s and %s. Starting Soft-AP Mode",SSID.c_str(),Passwd.c_str());
-            WiFi.softAP(chipId.c_str());
+            WiFi.softAP(ChipId.c_str());
             ApMode=true;
         }
         
@@ -51,7 +51,7 @@ void wificonfig::reset()
 {
     SSID="";
     Passwd="";
-    Name=chipId.c_str();
+    Name=ChipId.c_str();
     save();
 }
 
@@ -65,7 +65,7 @@ void wificonfig::load()
         Serial.println("wifi.json does not exist, load defaults");
         SSID="";
         Passwd="";
-        Name=chipId.c_str();
+        Name=ChipId.c_str();
     }
     else
     {
@@ -77,7 +77,7 @@ void wificonfig::load()
             Serial.println("wifi.json is empty, load defaults");
             SSID="";
             Passwd="";
-            Name=chipId.c_str();
+            Name=ChipId.c_str();
         }
         Serial.println("Reading file...");
         DeserializationError err=deserializeJson(doc,file);
@@ -88,7 +88,7 @@ void wificonfig::load()
             Serial.println("Unable to read Config. load defaults");
             SSID="";
             Passwd="";
-            Name=chipId.c_str();
+            Name=ChipId.c_str();
             save();
         }
         else
@@ -96,7 +96,7 @@ void wificonfig::load()
             Serial.println("Setup informations from file...");
             SSID=doc["SSID"] | "";
             Passwd=doc["Passwd"] | "";
-            Name=doc["Name"] | chipId.c_str();
+            Name=doc["Name"] | ChipId.c_str();
         }
     }
 }
