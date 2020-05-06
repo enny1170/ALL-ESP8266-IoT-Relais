@@ -1,0 +1,59 @@
+    //Move client to /html/index.html
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+        request->redirect("/html/index.html");
+    });
+
+    server.on("/html/index.html",HTTP_GET,[](AsyncWebServerRequest *request){
+      request->send(SPIFFS,"/html/index.html",String(),false,indexProcessor);
+    });
+
+    server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+
+    // Send a GET request to <IP>/html/switch?message=<message>
+    server.on("/html/switch", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        String message;
+        if (request->hasParam(PARAM_MESSAGE)) {
+            message = request->getParam(PARAM_MESSAGE)->value();
+        } else {
+            message = "";
+        }
+        if(message!="0" && message!="1")
+        {
+          request->send(403,"text/plain","unknown or malformed parameter. ?cmd=1 or ?cmd=0");
+        }
+        else
+        {
+          if(message=="1" && GetState()==false)
+          {
+            switchCoil(true);
+            request->send(200,"text/plain","new State ON");
+          }
+          else if(message=="0" && GetState()==true)
+          {
+            switchCoil(false);
+            request->send(200,"text/plain","New State OFF");
+          }
+          else
+          {
+            request->send(201);
+          }
+          
+        }
+        
+        request->send(200, "text/plain", "Hello, GET: " + message);
+    });
+
+    // Send a POST request to <IP>/post with a form field message set to <message>
+    server.on("/post", HTTP_POST, [](AsyncWebServerRequest *request){
+        String message;
+        if (request->hasParam(PARAM_MESSAGE, true)) {
+            message = request->getParam(PARAM_MESSAGE, true)->value();
+        } else {
+            message = "No message sent";
+        }
+        request->send(200, "text/plain", "Hello, POST: " + message);
+    });
+
+    server.onNotFound(notFound);
+
+    server.begin();
