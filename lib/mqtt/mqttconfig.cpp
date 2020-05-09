@@ -60,16 +60,21 @@ void mqttconfig::load()
 void mqttconfig::save()
 {
     DynamicJsonDocument doc(capacity);
-    File file=SPIFFS.open("/mqtt.json","c");
+
+    File file=SPIFFS.open("/mqtt.json","w");
     if(!file)
     {
         Serial.println("mqtt.json does not exist");
     }
-    doc["ServerAddress"]=ServerAddress;
-    doc["ServerPort"]=ServerPort;
-    doc["Enabled"]=Enabled;
-    serializeJson(doc,file);
-    file.close();
+    else
+    {
+        doc["ServerAddress"]=ServerAddress;
+        doc["ServerPort"]=ServerPort;
+        doc["Enabled"]=Enabled;
+        serializeJson(doc,file);
+        file.close();
+    }
+    
 
 }
 

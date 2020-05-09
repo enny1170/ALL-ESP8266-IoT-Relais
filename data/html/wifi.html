@@ -47,6 +47,14 @@
                <div class="content">
                   <form method="POST">
                      <div class="field">
+                        <div class="label">State:</div>
+                        <div class="control">%TemplateState%</div>
+                     </div>
+                     <div class="field">
+                        <div class="label">Mode:</div>
+                        <div class="control">%TemplateMode%</div>
+                     </div>
+                     <div class="field">
                         <div class="label">WiFi SSID:</div>
                         <div class="control">
                             <input class="input" type="text" value="%TemplateSSID%" name="ssid">
@@ -60,8 +68,8 @@
                      </div>
                      <div class="field">
                         <div class="buttons">
-                            <button class="button">Save and reboot</button>
-                            <button class="button">Cancel</button>
+                            <input class="button" type="submit" value="Save"/>
+                            <a class="button" href="index.html">Cancel</a>
                         </div>
                     </div>
                   </form>
