@@ -46,10 +46,14 @@
             <div class="container">
                <div class="content">
                   <form method="POST">
+                     <div class="field">
+                        <div class="label">State:</div>
+                        <div class="control">%TemplateState%</div>
+                     </div>
                     <div class="field">
                         <div class="control">
                             <label class="checkbox">MQTT enabled:</Label>
-                            <input type="checkbox" value="enabled" name="enabled" checked="%TemplateMQTTEnabled%">
+                            <input type="checkbox" value="enabled" name="enabled" %TemplateMQTTEnabled%>
                         </div>
                      </div>
                      <div class="field">
@@ -66,8 +70,8 @@
                      </div>
                      <div class="field">
                         <div class="buttons">
-                            <button class="button">Save</button>
-                            <button class="button">Cancel</button>
+                            <input class="button" type="submit" value="Save" />
+                            <a class="button" href="index.html">Cancel</a>
                         </div>
                     </div>
                   </form>

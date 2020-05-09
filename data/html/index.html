@@ -45,7 +45,7 @@
         <section class="section">
             <div class="container">
                <div class="content">
-                  <form>
+                  <form method="GET" action="/html/switch.html" >
                      <div class="field">
                         <div class="label">Device Id:</div>
                         <div class="control">%TemplateDeviceId%</div>
@@ -62,10 +62,15 @@
                         <div class="label">State:</div>
                         <div class="control">%TemplateCoilState%</div>
                      </div>
+                     <div class="field">
+                        <div class="buttons">
+                            <a class="button is-danger" href="/html/switch.html?cmd=1">ON</a>
+                            <a class="button is-success" href="/html/switch.html?cmd=0">OFF</a>
+                        </div>
+                    </div>                 
                   </form>
                </div>
              </div>
         </section>
     </body>
 </html>
-

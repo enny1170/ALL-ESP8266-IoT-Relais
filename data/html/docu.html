@@ -49,13 +49,13 @@
                 <p>Support fallowing mechanism for switching the onboard Relais</p>
                     <dl class="content is-small">
                         <li>
-                            switching by URL http://[IP-Address]/html/switch?cmd=1 for ON or  </br> http://[IP-Address]/html/switch?cmd=0 for OFF
+                            switching by URL http://[IP-Address]/html/switch.html?cmd=1 for ON or  </br> http://[IP-Address]/html/switch.html?cmd=0 for OFF
                         </li>
                         <li>
                             using Web-Sockets on http://[IP-Address]/ws possible Values 1/0 for ON/OFF
                         </li>
                         <li>
-                            connect to a MQTT-Broker, Status will be published to Topic [DeviceId]/state </br> Commands will subscribed at [DeviceId]/cmd, possible Values 1/0 for ON/OFF
+                            connect to a MQTT-Broker, Status will be published to Topic [DeviceId]/state </br> Commands will subscribed at [DeviceId]/cmd, possible Values 1/0 for ON/OFF </br>the current It-Addrress wil published to Topic [DeviceId]/ip
                         </li>
                     </dl>
                 

@@ -1,6 +1,6 @@
 #include "wificfg.h"
 #include <ArduinoJson.h>
-#define Max_Connects    10
+#define Max_Connects    2
 
 const size_t capacity = JSON_OBJECT_SIZE(2) + 70;
 
@@ -23,6 +23,7 @@ void wificonfig::begin()
         for(int i=0;i<Max_Connects;i++)
         {
             Serial.printf("Wifi %i try...\n",i);
+            WiFi.mode(WIFI_STA);
             WiFi.begin(SSID, Passwd);
             if (WiFi.waitForConnectResult() != WL_CONNECTED) {
                 WiFi.disconnect(false);
@@ -36,15 +37,20 @@ void wificonfig::begin()
         }
         if(WiFi.status() != WL_CONNECTED)
         {
-            Serial.printf("Failed to connect %s and %s. Starting Soft-AP Mode",SSID.c_str(),Passwd.c_str());
+            Serial.printf("Failed to connect %s . Starting Soft-AP Mode\n",SSID.c_str());
             WiFi.softAP(ChipId.c_str());
             ApMode=true;
-        }
-        
-        Serial.print("Ip-Address: ");
+        }        
+    }
+    Serial.print("Ip-Address: ");
+    if(WiFi.getMode()==WiFiMode::WIFI_STA||WiFi.getMode()==WiFiMode::WIFI_AP_STA)
+    {
         Serial.println(WiFi.localIP());
     }
-    
+    else
+    {
+        Serial.println("192.168.4.1");
+    }   
 }
 
 void wificonfig::reset()
@@ -104,7 +110,7 @@ void wificonfig::load()
 void wificonfig::save()
 {
     DynamicJsonDocument doc(capacity);
-    File file=SPIFFS.open("/wifi.json","c");
+    File file=SPIFFS.open("/wifi.json","w");
     if(!file)
     {
         Serial.println("wifi.json does not exist");
