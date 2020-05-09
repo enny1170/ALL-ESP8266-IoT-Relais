@@ -1,9 +1,9 @@
-//
-// A simple server implementation showing how to:
-//  * serve static messages
-//  * read GET and POST parameters
-//  * handle missing pages / 404s
-//
+/*****************************************************************************************************************************************
+ * 
+ * Firmware for ESP8266 based Relais Actuators, cofigurable by Web-Server, Controlable by MQTT and HTTP
+ * 
+ * ***************************************************************************************************************************************
+ */
 
 #include <Arduino.h>
 #ifdef ESP32
@@ -25,6 +25,14 @@
 #include <AsyncMqttClient.h>
 
 #define SPIFFS_USE_MAGIC
+
+#ifdef ALL4DUINO
+  // device uses SSR so we need 2 pins to switch
+  #define RELAIS_ON_PIN D5
+  #define RELAIS_OFF_PIN D6
+#else
+  #define RELAUS_ON_PIN D5
+#endif
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
@@ -75,11 +83,12 @@ wifiConnectState ConnState;
 String indexProcessor(const String& var);
 String wifiProcessor(const String& var);
 String mqttProcessor(const String& var);
-
+void switchCoil(bool on);
+bool GetState();
+const char* StateValue();
 
 void connectToWifi() {
   Serial.println("Connecting to Wi-Fi...");
-//  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   ConnState=wifiConnectState::Start;
   wifiConfig.begin();
 }
@@ -90,7 +99,6 @@ void onWifiConnect(const WiFiEventStationModeGotIP& event) {
   PublishPath=wifiConfig.Name+String("/state");
   PublishIp=wifiConfig.Name+String("/ip");
   ConnState=wifiConnectState::NewConnect;
-  // connectToMqtt();
 }
 
 void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
@@ -100,67 +108,24 @@ void onWifiDisconnect(const WiFiEventStationModeDisconnected& event) {
     //Try to reconnect exept a try is running
     ConnState=wifiConnectState::ConnectionLost;
   }
-  // mqttReconnectTimer.detach(); // ensure we don't reconnect to MQTT while reconnecting to Wi-Fi
-  // wifiReconnectTimer.once(2, connectToWifi);
 }
 
+/****************************************************************************************************************************************************
+ * 
+ * SETUP - Main Entrypoint
+ * 
+ * **************************************************************************************************************************************************
+ */
 
-
-void switchCoil(bool on)
-{
-  if(on)
-  {
-    digitalWrite(D6,LOW);
-    digitalWrite(D5,HIGH);
-  }
-  else
-  {
-    digitalWrite(D5,LOW);
-    digitalWrite(D6,HIGH);
-  }
-  // Refresh Mqtt State
-  if(mqttClient.connected())
-  {
-    mqttClient.publish(PublishPath.c_str(),1,false,StateValue());
-  }
-}
-
-bool GetState()
-{
-  if(digitalRead(D5)==0)
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
-  
-}
-
-const char* StateValue()
-{
-  if(GetState())
-    return "1";
-  else
-    return "0";
-}
 
 void setup() {
 
     Serial.begin(115200);
-    pinMode(12,OUTPUT);
-    pinMode(14,OUTPUT);
+    pinMode(RELAIS_ON_PIN,OUTPUT);
+    #ifdef RELAIS_OFF_PIN
+    pinMode(RELAIS_OFF_PIN,OUTPUT);
+    #endif
     switchCoil(false);
-    // WiFi.mode(WIFI_STA);
-    // WiFi.begin(ssid, password);
-    // if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    //     Serial.printf("WiFi Failed!\n");
-    //     return;
-    // }
-
-    // Serial.print("IP Address: ");
-    // Serial.println(WiFi.localIP());
 
   wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
   wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
@@ -194,14 +159,13 @@ void setup() {
       Serial.println("Failed to mount file system");
     return;
     }
-    //wifiConfig.begin();
     mqttcfg.load();
     mqttClient.setServer(mqttcfg.ServerAddress.c_str(), mqttcfg.ServerPort);
     connectToWifi();
 
     MDNS.addService("http","tcp",80);
-    // ArduinoOTA.setHostname(wifiConfig.Name.c_str());
-    // ArduinoOTA.begin();
+//    ArduinoOTA.setHostname(wifiConfig.Name.c_str());
+//    ArduinoOTA.begin();
 
     ws.onEvent(onWsEvent);
     server.addHandler(&ws);
@@ -332,32 +296,14 @@ void setup() {
         request->send(200, "text/plain", "Hello, GET: " + message);
     });
 
-    // Send a GET request to <IP>/get?message=<message>
-    server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
-        String message;
-        if (request->hasParam(PARAM_MESSAGE)) {
-            message = request->getParam(PARAM_MESSAGE)->value();
-        } else {
-            message = "No message sent";
-        }
-        request->send(200, "text/plain", "Hello, GET: " + message);
-    });
-
-    // Send a POST request to <IP>/post with a form field message set to <message>
-    server.on("/post", HTTP_POST, [](AsyncWebServerRequest *request){
-        String message;
-        if (request->hasParam(PARAM_MESSAGE, true)) {
-            message = request->getParam(PARAM_MESSAGE, true)->value();
-        } else {
-            message = "No message sent";
-        }
-        request->send(200, "text/plain", "Hello, POST: " + message);
-    });
-
     server.onNotFound(notFound);
 
     server.begin();
 }
+
+// End of Setup
+
+// LOOP
 
 void loop() {
   ArduinoOTA.handle();
@@ -376,6 +322,13 @@ void loop() {
     break;
   }
 }
+
+/*********************************************************************************************************************************************************************
+ * 
+ * Website Processing
+ * 
+ * *******************************************************************************************************************************************************************
+ */
 
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
   if(type == WS_EVT_CONNECT){
@@ -689,3 +642,57 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   }
   //mqttClient.publish(PublishPath.c_str(), 1, true, StateValue());
 }
+
+
+/********************************************************************************************************************************
+ * 
+ * Relais Support Functions
+ * 
+ * ******************************************************************************************************************************
+ */
+
+
+void switchCoil(bool on)
+{
+  if(on)
+  {
+    #ifdef RELAIS_OFF_PIN
+    digitalWrite(RELAIS_OFF_PIN,LOW);
+    #endif
+    digitalWrite(RELAIS_ON_PIN,HIGH);
+  }
+  else
+  {
+    digitalWrite(RELAIS_ON_PIN,LOW);
+    #ifdef RELAIS_OFF_PIN
+    digitalWrite(RELAIS_OFF_PIN,HIGH);
+    #endif
+  }
+  // Refresh Mqtt State
+  if(mqttClient.connected())
+  {
+    mqttClient.publish(PublishPath.c_str(),1,false,StateValue());
+  }
+}
+
+bool GetState()
+{
+  if(digitalRead(RELAIS_ON_PIN)==0)
+  {
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+  
+}
+
+const char* StateValue()
+{
+  if(GetState())
+    return "1";
+  else
+    return "0";
+}
+
