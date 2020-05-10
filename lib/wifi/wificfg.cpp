@@ -2,7 +2,7 @@
 #include <ArduinoJson.h>
 #define Max_Connects    2
 
-const size_t capacity = JSON_OBJECT_SIZE(2) + 70;
+const size_t capacity = JSON_OBJECT_SIZE(2) + 200;
 
 wificonfig::wificonfig()
 {
@@ -45,7 +45,7 @@ void wificonfig::begin()
     Serial.print("Ip-Address: ");
     if(WiFi.getMode()==WiFiMode::WIFI_STA||WiFi.getMode()==WiFiMode::WIFI_AP_STA)
     {
-        Serial.println(WiFi.localIP());
+        Serial.println(WiFi.localIP().toString());
     }
     else
     {
@@ -58,6 +58,7 @@ void wificonfig::reset()
     SSID="";
     Passwd="";
     Name=ChipId.c_str();
+    DeviceName="";
     save();
 }
 
@@ -72,6 +73,7 @@ void wificonfig::load()
         SSID="";
         Passwd="";
         Name=ChipId.c_str();
+        DeviceName="";
     }
     else
     {
@@ -84,6 +86,7 @@ void wificonfig::load()
             SSID="";
             Passwd="";
             Name=ChipId.c_str();
+            DeviceName="";
         }
         Serial.println("Reading file...");
         DeserializationError err=deserializeJson(doc,file);
@@ -95,6 +98,7 @@ void wificonfig::load()
             SSID="";
             Passwd="";
             Name=ChipId.c_str();
+            DeviceName="";
             save();
         }
         else
@@ -102,7 +106,10 @@ void wificonfig::load()
             Serial.println("Setup informations from file...");
             SSID=doc["SSID"] | "";
             Passwd=doc["Passwd"] | "";
-            Name=doc["Name"] | ChipId.c_str();
+            // Name=doc["Name"] | ChipId.c_str();
+            // use ChipId every Time
+            Name=ChipId.c_str();
+            DeviceName=doc["Device"] | "";
         }
     }
 }
@@ -118,6 +125,7 @@ void wificonfig::save()
     doc["SSID"]=SSID;
     doc["Passwd"]=Passwd;
     doc["Name"]=Name;
+    doc["Device"]=DeviceName;
     serializeJson(doc,file);
     file.close();
 }

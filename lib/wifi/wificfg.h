@@ -16,6 +16,7 @@ class wificonfig
     String SSID;
     String Passwd;
     String Name=String("ESP-");
+    String DeviceName=String("");
     bool ApMode=false;
     String ChipId;
     void begin();

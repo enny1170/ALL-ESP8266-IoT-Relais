@@ -42,6 +42,7 @@ wificonfig wifiConfig;
 String SubscribePath;
 String PublishPath;
 String PublishIp;
+String PublishName;
 
 const char* PARAM_MESSAGE = "cmd";
 
@@ -98,6 +99,7 @@ void onWifiConnect(const WiFiEventStationModeGotIP& event) {
   SubscribePath=wifiConfig.Name+String("/cmd");
   PublishPath=wifiConfig.Name+String("/state");
   PublishIp=wifiConfig.Name+String("/ip");
+  PublishName=wifiConfig.Name+String("/name");
   ConnState=wifiConnectState::NewConnect;
 }
 
@@ -164,6 +166,7 @@ void setup() {
     connectToWifi();
 
     MDNS.addService("http","tcp",80);
+    MDNS.begin(wifiConfig.Name);
 //    ArduinoOTA.setHostname(wifiConfig.Name.c_str());
 //    ArduinoOTA.begin();
 
@@ -213,8 +216,13 @@ void setup() {
         } else {
             wifiConfig.Passwd = "";
         }
+        if (request->hasParam("devicename", true)) {
+            wifiConfig.DeviceName = request->getParam("devicename", true)->value();
+        } else {
+            wifiConfig.DeviceName = "";
+        }
         wifiConfig.save();
-        request->send(SPIFFS,"/html/wifi.html",String(),false,wifiProcessor);
+        request->send(SPIFFS,"/html/index.html",String(),false,indexProcessor);
         ESP.restart();
     });
 
@@ -409,6 +417,10 @@ String indexProcessor(const String& var)
   {
     return wifiConfig.Name;
   }
+  if(var == "TemplateDeviceName")
+  {
+    return wifiConfig.DeviceName;
+  }
   if(var == "TemplateIpAddress")
   {
     return WiFi.localIP().toString();
@@ -474,6 +486,10 @@ String wifiProcessor(const String& var)
       return "Undefined";
       break;
     }    
+  }
+  if(var == "TemplateDeviceName")
+  {
+    return wifiConfig.DeviceName;
   }
   return String("");
 }
@@ -551,28 +567,24 @@ void onMqttConnect(bool sessionPresent)
 #ifdef DEBUG
   Serial.print("Session present: ");
   Serial.println(sessionPresent);
-  //  uint16_t packetIdSub = mqttClient.subscribe("test/lol", 2);
   Serial.print("Subscribe to: ");
   Serial.println(SubscribePath);
 #endif
   mqttClient.publish(SubscribePath.c_str(), 1, true, StateValue());
-  uint16_t packetIdSub = mqttClient.subscribe(SubscribePath.c_str(), 2);
+  #ifdef DEBUG
+    uint16_t packetIdSub = mqttClient.subscribe(SubscribePath.c_str(), 2);
+  #else
+    mqttClient.subscribe(SubscribePath.c_str(), 2);
+  #endif
   mqttClient.publish(PublishIp.c_str(), 1, true, WiFi.localIP().toString().c_str());
+  mqttClient.publish(PublishName.c_str(),1,true,wifiConfig.DeviceName.c_str());
 #ifdef DEBUG
   Serial.print("Subscribing at QoS 2, packetId: ");
   Serial.println(packetIdSub);
-  //  mqttClient.publish("test/lol", 0, true, "test 1");
   Serial.print("Publish at: ");
   Serial.println(PublishPath);
 #endif
-  mqttClient.publish(PublishPath.c_str(), 1, true, StateValue());
-  // Serial.println("Publishing at QoS 0");
-  // uint16_t packetIdPub1 = mqttClient.publish("test/lol", 1, true, "test 2");
-  // Serial.print("Publishing at QoS 1, packetId: ");
-  // Serial.println(packetIdPub1);
-  // uint16_t packetIdPub2 = mqttClient.publish("test/lol", 2, true, "test 3");
-  // Serial.print("Publishing at QoS 2, packetId: ");
-  // Serial.println(packetIdPub2);
+  mqttClient.publish(PublishPath.c_str(), 1, false, StateValue());
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
