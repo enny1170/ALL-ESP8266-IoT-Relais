@@ -164,11 +164,10 @@ void setup() {
     mqttcfg.load();
     mqttClient.setServer(mqttcfg.ServerAddress.c_str(), mqttcfg.ServerPort);
     connectToWifi();
+    // ArduinoOTA.setHostname(wifiConfig.Name.c_str());
 
-    MDNS.addService("http","tcp",80);
-    MDNS.begin(wifiConfig.Name);
-//    ArduinoOTA.setHostname(wifiConfig.Name.c_str());
-//    ArduinoOTA.begin();
+    // MDNS.addService("http","tcp",80);
+    // MDNS.begin(wifiConfig.Name);
 
     ws.onEvent(onWsEvent);
     server.addHandler(&ws);
@@ -314,12 +313,13 @@ void setup() {
 // LOOP
 
 void loop() {
-  ArduinoOTA.handle();
   ws.cleanupClients();
   // Handle Wifi Flags
   switch (ConnState)
   {
   case wifiConnectState::NewConnect:
+    ArduinoOTA.begin();
+
     connectToMqtt();
     break;
   case wifiConnectState::ConnectionLost:
@@ -327,6 +327,7 @@ void loop() {
     wifiReconnectTimer.once(2, connectToWifi);
     break;
   default:
+    ArduinoOTA.handle();
     break;
   }
 }
